@@ -1,0 +1,120 @@
+@import 'tailwindcss';
+
+/* Paleta tomada del logo y del Catálogo 2026. */
+@theme {
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c3d0ff;
+  --color-brand-300: #9db1fd;
+  --color-brand-400: #6f8bf9;
+  --color-brand-500: #3d63f5;
+  --color-brand-600: #2c4de0;
+  --color-brand-700: #233dba;
+
+  --color-navy-700: #1a3091;
+  --color-navy-800: #12267a;
+  --color-navy-900: #0a1f66;
+  --color-navy-950: #06123d;
+
+  --color-whatsapp: #25d366;
+
+  /* Animaciones (clases animate-*) */
+  --animate-fade-up: fade-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-fade-in: fade-in 0.35s ease-out both;
+  --animate-zoom-in: zoom-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-drift: drift 16s ease-in-out infinite;
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-pop: pop 0.45s cubic-bezier(0.3, 1.6, 0.5, 1);
+  --animate-wiggle: wiggle 0.5s ease-in-out;
+  --animate-slide-in-right: slide-in-right 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-toast-in: toast-in 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-glow: glow 5s ease-in-out infinite;
+  --animate-shine: shine 6s linear infinite;
+  --animate-ping-slow: ping-slow 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+  @keyframes fade-up { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+  @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes zoom-in { from { opacity: 0; transform: scale(0.92) rotate(-2deg); } to { opacity: 1; transform: none; } }
+  @keyframes float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-14px) rotate(1deg); } }
+  @keyframes drift { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-30px, 24px) scale(1.06); } }
+  @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.45); } 100% { transform: scale(1); } }
+  @keyframes wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+  @keyframes slide-in-right { from { transform: translateX(100%); } to { transform: none; } }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(16px) scale(0.96); } to { opacity: 1; transform: none; } }
+  @keyframes glow { 0%, 100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.12); } }
+  @keyframes shine { to { background-position: 200% center; } }
+  @keyframes ping-slow { 0% { transform: scale(1); opacity: 0.7; } 80%, 100% { transform: scale(1.9); opacity: 0; } }
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  :focus-visible { outline: 2px solid var(--color-brand-500); outline-offset: 2px; }
+  button { cursor: pointer; }
+  button:disabled { cursor: not-allowed; }
+}
+
+/* Aparición al hacer scroll (directiva appReveal). Solo se aplica en el navegador
+   a elementos fuera de pantalla, así el SSR y lo visible al cargar nunca parpadean. */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-visible { opacity: 1; transform: none; }
+
+/* Transición suave entre páginas (router withViewTransitions). */
+::view-transition-old(root) { animation: 0.18s ease-in both fade-out-soft; }
+::view-transition-new(root) { animation: 0.32s cubic-bezier(0.2, 0.7, 0.2, 1) both fade-in-soft; }
+@keyframes fade-out-soft { to { opacity: 0; } }
+@keyframes fade-in-soft { from { opacity: 0; transform: translateY(8px); } }
+
+/* Respeta "reducir movimiento" del sistema. */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
+
+/* Clases reutilizables (Tailwind 4: @utility para poder combinarlas con @apply). */
+@utility container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8; }
+
+@utility btn { @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition duration-200 active:scale-[0.97] disabled:opacity-50 disabled:active:scale-100; }
+@utility btn-primary {
+  @apply btn relative overflow-hidden bg-brand-500 text-white shadow-sm shadow-brand-500/30 hover:-translate-y-0.5 hover:bg-brand-600 hover:shadow-lg hover:shadow-brand-500/40;
+  /* Destello que cruza el botón al pasar el mouse. */
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 0.7s ease;
+    pointer-events: none;
+  }
+  &:hover::after { transform: translateX(120%); }
+}
+@utility btn-navy { @apply btn bg-navy-900 text-white hover:bg-navy-800; }
+@utility btn-outline { @apply btn border border-brand-200 bg-white text-navy-900 hover:border-brand-500 hover:text-brand-600; }
+@utility btn-whatsapp { @apply btn bg-whatsapp text-white hover:-translate-y-0.5 hover:shadow-lg hover:shadow-emerald-500/30 hover:brightness-95; }
+@utility btn-ghost { @apply btn px-3 py-2 text-navy-900 hover:bg-brand-50; }
+
+@utility chip { @apply inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold tracking-wide text-brand-600 uppercase; }
+
+@utility card { @apply rounded-3xl border border-brand-100 bg-white; }
+
+@utility field-label { @apply mb-1.5 block text-sm font-medium text-navy-900; }
+@utility field { @apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100; }
+@utility field-error { @apply mt-1 text-xs text-red-600; }
+
+@utility section-title { @apply text-2xl font-bold tracking-tight text-navy-900 sm:text-3xl; }
+@utility section-bar { @apply mt-3 h-1 w-12 rounded-full bg-gradient-to-r from-brand-500 to-brand-300; }
